@@ -9,7 +9,12 @@ import dev.deftu.omnicore.api.eventBus
 import dev.deftu.omnicore.internal.client.render.TemporaryTextureAllocator
 import dev.deftu.omnicore.internal.internalLocationOf
 import net.minecraft.client.renderer.RenderPipelines
+//#if MC >= 26.1
+//$$ import net.minecraft.client.renderer.ProjectionMatrixBuffer
+//$$ import net.minecraft.client.renderer.Projection
+//#else
 import net.minecraft.client.renderer.CachedOrthoProjectionMatrixBuffer
+//#endif
 import net.minecraft.client.renderer.texture.AbstractTexture
 
 /**
@@ -23,7 +28,11 @@ import net.minecraft.client.renderer.texture.AbstractTexture
  */
 public object ImmediateScreenRenderer {
     private var isInitialized = false
+    //#if MC >= 26.1
+    //$$ private var cachedProjectionMatrix: ProjectionMatrixBuffer? = null
+    //#else
     private var cachedProjectionMatrix: CachedOrthoProjectionMatrixBuffer? = null
+    //#endif
     private var textureAllocator = TemporaryTextureAllocator {
         cachedProjectionMatrix?.close()
         cachedProjectionMatrix = null
@@ -50,11 +59,20 @@ public object ImmediateScreenRenderer {
         val width = OmniResolution.viewportWidth
         val height = OmniResolution.viewportHeight
         val textureAllocation = textureAllocator.allocate(width, height)
+        //#if MC >= 26.1
+        //$$ val projectionMatrix = cachedProjectionMatrix ?: ProjectionMatrixBuffer("Immediately rendered screen").also { cachedProjectionMatrix = it }
+        //$$ val orthoProjection = Projection().also { it.setupOrtho(1_000f, 21_000f, width.toFloat() / scaleFactor, height.toFloat() / scaleFactor, true) }
+        //$$
+        //$$ val prevProjectionBuffer = RenderSystem.getProjectionMatrixBuffer()
+        //$$ val prevProjectionType = RenderSystem.getProjectionType()
+        //$$ RenderSystem.setProjectionMatrix(projectionMatrix.getBuffer(orthoProjection), ProjectionType.ORTHOGRAPHIC)
+        //#else
         val projectionMatrix = cachedProjectionMatrix ?: CachedOrthoProjectionMatrixBuffer("Immediately rendered screen", 1_000f, 21_000f, true).also { cachedProjectionMatrix = it }
 
         val prevProjectionBuffer = RenderSystem.getProjectionMatrixBuffer() ?: throw IllegalStateException("No previous projection matrix buffer found!")
         val prevProjectionType = RenderSystem.getProjectionType()
         RenderSystem.setProjectionMatrix(projectionMatrix.getBuffer(width.toFloat() / scaleFactor, height.toFloat() / scaleFactor), ProjectionType.ORTHOGRAPHIC)
+        //#endif
 
         val prevColorOverride = RenderSystem.outputColorTextureOverride
         val prevDepthOverride = RenderSystem.outputDepthTextureOverride
@@ -67,7 +85,7 @@ public object ImmediateScreenRenderer {
         RenderSystem.outputColorTextureOverride = prevColorOverride
         RenderSystem.outputDepthTextureOverride = prevDepthOverride
         @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-        RenderSystem.setProjectionMatrix(prevProjectionBuffer, prevProjectionType)
+        RenderSystem.setProjectionMatrix(prevProjectionBuffer!!, prevProjectionType)
 
         val identifier = internalLocationOf("__temporary_screen_render__")
         client.textureManager.register(identifier, object : AbstractTexture() {

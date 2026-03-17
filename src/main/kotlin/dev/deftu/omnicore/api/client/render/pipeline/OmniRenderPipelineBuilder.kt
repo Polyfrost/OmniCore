@@ -20,7 +20,9 @@ import dev.deftu.omnicore.api.ID
 import dev.deftu.omnicore.api.client.render.shader.uniforms.UniformDefinition
 import dev.deftu.omnicore.api.client.render.shader.uniforms.UniformKind
 import dev.deftu.omnicore.api.locationOrThrow
+//#if MC < 26.1
 import com.mojang.blaze3d.opengl.GlCommandEncoder
+//#endif
 import org.apache.commons.codec.digest.DigestUtils
 //#else
 //$$ import dev.deftu.omnicore.api.client.render.state.CullFace
@@ -166,7 +168,11 @@ public class OmniRenderPipelineBuilder internal constructor(
             vanilla = object : WrappingPipeline(vanilla) {
                 val stackWalker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
                 override fun isCull(): Boolean {
+                    //#if MC >= 26.1
+                    //$$ if (stackWalker.callerClass == Class.forName("com.mojang.blaze3d.opengl.GlCommandEncoder")) {
+                    //#else
                     if (stackWalker.callerClass == GlCommandEncoder::class.java) {
+                    //#endif
                         GlStateManager._enableDepthTest()
                         GlStateManager._depthFunc(GL11.GL_ALWAYS)
                     }

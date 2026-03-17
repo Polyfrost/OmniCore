@@ -28,7 +28,9 @@ public object OmniClientChat {
     @JvmStatic
     public fun displayChatMessage(text: Text) {
         player
-            //#if MC >= 1.16.5
+            //#if MC >= 26.1
+            //$$ ?.sendSystemMessage(MCText.convert(text))
+            //#elseif MC >= 1.16.5
             ?.displayClientMessage(MCText.convert(text), false)
             //#else
             //$$ ?.sendMessage(MCText.convert(text))
@@ -54,7 +56,9 @@ public object OmniClientChat {
 
     @JvmStatic
     public fun displayActionBar(text: Text) {
-        //#if MC >= 1.16.5
+        //#if MC >= 26.1
+        //$$ player?.sendOverlayMessage(MCText.convert(text))
+        //#elseif MC >= 1.16.5
         player?.displayClientMessage(MCText.convert(text), true)
         //#elseif MC >= 1.12.2
         //$$ player?.sendStatusMessage(MCText.convert(text), true)

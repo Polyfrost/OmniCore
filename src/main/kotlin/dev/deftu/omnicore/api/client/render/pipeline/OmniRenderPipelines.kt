@@ -268,7 +268,14 @@ public object OmniRenderPipelines {
         //#endif
 
         //#if MC >= 1.21.5
+        //#if MC >= 26.1
+        //$$ val samplers = run {
+        //$$     val uvElements = setOf(VertexFormatElement.UV0, VertexFormatElement.UV, VertexFormatElement.UV1, VertexFormatElement.UV2)
+        //$$     List(vertexFormat.elements.count { it in uvElements }) { "Sampler$it" }
+        //$$ }
+        //#else
         val samplers = List(vertexFormat.elements.map(VertexFormatElement::usage).count(VertexFormatElement.Usage.UV::equals)) { "Sampler$it" }
+        //#endif
         val uniforms = mapOf(
             //#if MC >= 1.21.6
             "DynamicTransforms" to UniformType.UNIFORM_BUFFER,

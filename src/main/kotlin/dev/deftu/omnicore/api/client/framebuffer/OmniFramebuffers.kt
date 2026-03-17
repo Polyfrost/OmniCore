@@ -7,7 +7,12 @@ import dev.deftu.omnicore.api.client.textures.OmniTextureFormat
 import dev.deftu.omnicore.api.client.textures.OmniTextures
 import dev.deftu.omnicore.api.client.textures.TextureConfiguration
 
-//#if MC >= 1.21.5
+//#if MC >= 26.1
+//$$ import com.mojang.blaze3d.opengl.DirectStateAccess
+//$$ import com.mojang.blaze3d.opengl.GlTexture
+//$$ import com.mojang.blaze3d.systems.GpuDevice
+//$$ import com.mojang.blaze3d.systems.RenderSystem
+//#elseif MC >= 1.21.5
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.opengl.GlDevice
 import com.mojang.blaze3d.opengl.GlTexture
@@ -44,7 +49,19 @@ public object OmniFramebuffers {
 
     @JvmStatic
     public fun wrap(framebuffer: RenderTarget): OmniFramebuffer {
-        //#if MC >= 1.21.5
+        //#if MC >= 26.1
+        //$$ val dsa = run {
+        //$$     val gpuDevice = RenderSystem.getDevice()
+        //$$     val backendField = GpuDevice::class.java.getDeclaredField("backend").also { it.isAccessible = true }
+        //$$     val backend = backendField.get(gpuDevice)
+        //$$     backend.javaClass.getMethod("directStateAccess").invoke(backend) as DirectStateAccess
+        //$$ }
+        //$$ val id = (framebuffer.colorTexture as? GlTexture)?.getFbo(dsa, framebuffer.depthTexture)
+        //$$     ?: throw IllegalStateException("Framebuffer does not have a valid GL texture ID")
+        //$$ val colorTexture = framebuffer.colorTexture
+        //$$     ?: throw IllegalStateException("Framebuffer does not have a color attachment")
+        //$$ val depthTexture = framebuffer.depthTexture
+        //#elseif MC >= 1.21.5
         val backend = (RenderSystem.getDevice() as? GlDevice) ?: throw IllegalStateException("RenderSystem is not using a GL backend")
         val id = (framebuffer.colorTexture as? GlTexture)?.getFbo(backend.directStateAccess(), framebuffer.depthTexture)
             ?: throw IllegalStateException("Framebuffer does not have a valid GL texture ID")

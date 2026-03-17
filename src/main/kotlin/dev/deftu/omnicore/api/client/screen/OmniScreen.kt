@@ -119,7 +119,9 @@ public abstract class OmniScreen @JvmOverloads public constructor(
 
         if (event == KeyPressEvent.TYPED) {
             return super.charTyped(
-                //#if MC >= 1.21.9
+                //#if MC >= 26.1
+                //$$ CharacterEvent(typedChar.code),
+                //#elseif MC >= 1.21.9
                 CharacterEvent(typedChar.code, modifiers.toMods()),
                 //#else
                 //$$ typedChar,
@@ -405,7 +407,13 @@ public abstract class OmniScreen @JvmOverloads public constructor(
     }
 
     final override fun charTyped(event: CharacterEvent): Boolean {
-        return onKeyPress(OmniKeys.KEY_NONE, 0, event.codepoint.toChar(), KeyboardModifiers.wrap(event.modifiers), KeyPressEvent.TYPED)
+        return onKeyPress(OmniKeys.KEY_NONE, 0, event.codepoint.toChar(),
+            //#if MC >= 26.1
+            //$$ KeyboardModifiers.current,
+            //#else
+            KeyboardModifiers.wrap(event.modifiers),
+            //#endif
+            KeyPressEvent.TYPED)
     }
 
     final override fun keyReleased(event: KeyEvent): Boolean {
