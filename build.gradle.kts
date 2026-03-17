@@ -59,6 +59,10 @@ java {
     withSourcesJar()
 }
 
+repositories {
+
+}
+
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
